@@ -1,7 +1,12 @@
 'use strict';
 
 define('navigator', [
-	'forum/pagination', 'components', 'hooks', 'alerts', 'translator', 'storage',
+	'forum/pagination',
+	'components',
+	'hooks',
+	'alerts',
+	'translator',
+	'storage',
 ], function (pagination, components, hooks, alerts, translator, storage) {
 	const navigator = {};
 	let index = 0;
@@ -45,31 +50,62 @@ define('navigator', [
 		thumbs = $('.scroller-thumb');
 		bsEnv = utils.findBootstrapEnvironment();
 
-		$(window).off('scroll', navigator.delayedUpdate).on('scroll', navigator.delayedUpdate);
+		$(window)
+			.off('scroll', navigator.delayedUpdate)
+			.on('scroll', navigator.delayedUpdate);
 
-		paginationBlockEl.find('.dropdown-menu').off('click').on('click', function (e) {
-			e.stopPropagation();
-		});
+		paginationBlockEl
+			.find('.dropdown-menu')
+			.off('click')
+			.on('click', function (e) {
+				e.stopPropagation();
+			});
 
-		paginationBlockEl.off('shown.bs.dropdown', '.wrapper').on('shown.bs.dropdown', '.wrapper', function () {
-			const el = $(this);
-			setTimeout(async function () {
-				if (['lg', 'xl', 'xxl'].includes(utils.findBootstrapEnvironment())) {
-					el.find('input').trigger('focus');
-				}
-				const postCountInTopic = await socket.emit('topics.getPostCountInTopic', ajaxify.data.tid);
-				if (postCountInTopic > 0) {
-					paginationBlockEl.find('#myNextPostBtn').removeAttr('disabled');
-				}
-			}, 100);
-		});
-		paginationBlockEl.find('.pageup').off('click').on('click', navigator.scrollUp);
-		paginationBlockEl.find('.pagedown').off('click').on('click', navigator.scrollDown);
-		paginationBlockEl.find('.pagetop').off('click').on('click', navigator.toTop);
-		paginationBlockEl.find('.pagebottom').off('click').on('click', navigator.toBottom);
-		paginationBlockEl.find('.pageprev').off('click').on('click', pagination.previousPage);
-		paginationBlockEl.find('.pagenext').off('click').on('click', pagination.nextPage);
-		paginationBlockEl.find('#myNextPostBtn').off('click').on('click', gotoMyNextPost);
+		paginationBlockEl
+			.off('shown.bs.dropdown', '.wrapper')
+			.on('shown.bs.dropdown', '.wrapper', function () {
+				const el = $(this);
+				setTimeout(async function () {
+					if (['lg', 'xl', 'xxl'].includes(utils.findBootstrapEnvironment())) {
+						el.find('input').trigger('focus');
+					}
+					const postCountInTopic = await socket.emit(
+						'topics.getPostCountInTopic',
+						ajaxify.data.tid
+					);
+					if (postCountInTopic > 0) {
+						paginationBlockEl.find('#myNextPostBtn').removeAttr('disabled');
+					}
+				}, 100);
+			});
+		paginationBlockEl
+			.find('.pageup')
+			.off('click')
+			.on('click', navigator.scrollUp);
+		paginationBlockEl
+			.find('.pagedown')
+			.off('click')
+			.on('click', navigator.scrollDown);
+		paginationBlockEl
+			.find('.pagetop')
+			.off('click')
+			.on('click', navigator.toTop);
+		paginationBlockEl
+			.find('.pagebottom')
+			.off('click')
+			.on('click', navigator.toBottom);
+		paginationBlockEl
+			.find('.pageprev')
+			.off('click')
+			.on('click', pagination.previousPage);
+		paginationBlockEl
+			.find('.pagenext')
+			.off('click')
+			.on('click', pagination.nextPage);
+		paginationBlockEl
+			.find('#myNextPostBtn')
+			.off('click')
+			.on('click', gotoMyNextPost);
 
 		paginationBlockEl.find('input').on('keydown', function (e) {
 			if (e.which === 13) {
@@ -110,7 +146,8 @@ define('navigator', [
 		}
 		if (ajaxify.data.template.topic) {
 			let nextIndex = await getNext(index);
-			if (lastNextIndex === nextIndex) { // handles last post in pagination
+			if (lastNextIndex === nextIndex) {
+				// handles last post in pagination
 				nextIndex = await getNext(nextIndex);
 			}
 			if (nextIndex && index !== nextIndex + 1) {
@@ -160,7 +197,8 @@ define('navigator', [
 			const parentOffset = parent.offset();
 			const thumbIcon = thumb.find('.scroller-thumb-icon');
 			const thumbIconHeight = thumbIcon.height();
-			const gap = (parent.height() - thumbIconHeight) / (ajaxify.data.postcount - 1);
+			const gap =
+				(parent.height() - thumbIconHeight) / (ajaxify.data.postcount - 1);
 			const newTop = clampTop(thumb, parentOffset.top + ((index - 1) * gap));
 			const offset = { top: newTop, left: thumb.offset().left };
 			thumb.offset(offset);
@@ -176,7 +214,11 @@ define('navigator', [
 		if (bsEnv === 'xs' || bsEnv === 'sm' || bsEnv === 'md') {
 			thumb.find('.thumb-text').text(`${index}/${ajaxify.data.postcount}`);
 		} else {
-			thumb.find('.thumb-text').translateText(`[[topic:navigator.index, ${index}, ${ajaxify.data.postcount}]]`);
+			thumb
+				.find('.thumb-text')
+				.translateText(
+					`[[topic:navigator.index, ${index}, ${ajaxify.data.postcount}]]`
+				);
 		}
 	}
 
@@ -186,7 +228,9 @@ define('navigator', [
 			const postAtIndex = ajaxify.data.posts.find(
 				p => parseInt(p.index, 10) === Math.max(0, parseInt(index, 10) - 1)
 			);
-			const timestamp = postAtIndex ? postAtIndex.timestamp : await getPostTimestampByIndex(index);
+			const timestamp = postAtIndex ?
+				postAtIndex.timestamp :
+				await getPostTimestampByIndex(index);
 			el.attr('title', utils.toISOString(timestamp)).timeago();
 		}
 	}
@@ -194,7 +238,7 @@ define('navigator', [
 	async function getPostTimestampByIndex(index) {
 		// load timestamp of post from DOM if it exists
 		// if not load from server
-		const postEl = $(`[component="post"][data-index=${index - 1}]`);
+		const postEl = $(`[component='post'][data-index=${index - 1}]`);
 		if (postEl.length) {
 			return parseInt(postEl.attr('data-timestamp'), 10);
 		}
@@ -203,7 +247,6 @@ define('navigator', [
 			index: index - 1,
 		});
 	}
-
 
 	function handleScrollNav() {
 		if (!thumbs.length) {
@@ -226,7 +269,8 @@ define('navigator', [
 			const thumbIconHeight = thumbIcon.height();
 			const newTop = clampTop(thumb, y - (thumbIconHeight / 2));
 			const parentOffset = parent.offset();
-			const percent = (newTop - parentOffset.top) / (parent.height() - thumbIconHeight);
+			const percent =
+				(newTop - parentOffset.top) / (parent.height() - thumbIconHeight);
 			index = Math.max(1, Math.ceil(ajaxify.data.postcount * percent));
 			return index > ajaxify.data.postcount ? ajaxify.data.postcount : index;
 		}
@@ -235,7 +279,9 @@ define('navigator', [
 		hooks.on('action:ajaxify.end', function () {
 			renderPostIndex = null;
 		});
-		paginationBlockEl.find('.dropdown-menu').parent()
+		paginationBlockEl
+			.find('.dropdown-menu')
+			.parent()
 			.off('shown.bs.dropdown')
 			.on('shown.bs.dropdown', function () {
 				setThumbToIndex(index);
@@ -243,7 +289,10 @@ define('navigator', [
 
 		// the thumb that's being dragged, there can be more than on on the DOM
 		let dragThumb = null;
-		const debounceUpdateThumbTimestamp = utils.debounce(updateThumbTimestampToIndex, 50);
+		const debounceUpdateThumbTimestamp = utils.debounce(
+			updateThumbTimestampToIndex,
+			50
+		);
 		function mousemove(ev) {
 			if (!dragThumb || !dragThumb.length) {
 				return;
@@ -306,8 +355,14 @@ define('navigator', [
 
 			thumb.off('touchstart').on('touchstart', function (ev) {
 				isNavigating = true;
-				touchX = Math.min($(window).width(), Math.max(0, ev.touches[0].clientX));
-				touchY = Math.min($(window).height(), Math.max(0, ev.touches[0].clientY));
+				touchX = Math.min(
+					$(window).width(),
+					Math.max(0, ev.touches[0].clientX)
+				);
+				touchY = Math.min(
+					$(window).height(),
+					Math.max(0, ev.touches[0].clientY)
+				);
 				firstMove = true;
 				thumb.addClass('active');
 			});
@@ -315,8 +370,12 @@ define('navigator', [
 			thumb.off('touchmove').on('touchmove', function (ev) {
 				const windowWidth = $(window).width();
 				const windowHeight = $(window).height();
-				const deltaX = Math.abs(touchX - Math.min(windowWidth, Math.max(0, ev.touches[0].clientX)));
-				const deltaY = Math.abs(touchY - Math.min(windowHeight, Math.max(0, ev.touches[0].clientY)));
+				const deltaX = Math.abs(
+					touchX - Math.min(windowWidth, Math.max(0, ev.touches[0].clientX))
+				);
+				const deltaY = Math.abs(
+					touchY - Math.min(windowHeight, Math.max(0, ev.touches[0].clientY))
+				);
 				touchX = Math.min(windowWidth, Math.max(0, ev.touches[0].clientX));
 				touchY = Math.min(windowHeight, Math.max(0, ev.touches[0].clientY));
 
@@ -330,9 +389,15 @@ define('navigator', [
 					ev.stopPropagation();
 					const thumbIcon = thumb.find('.scroller-thumb-icon');
 					const thumbIconHeight = thumbIcon.height();
-					const newTop = clampTop(thumb, touchY + $(window).scrollTop() - (thumbIconHeight / 2));
+					const newTop = clampTop(
+						thumb,
+						touchY + $(window).scrollTop() - (thumbIconHeight / 2)
+					);
 					thumb.offset({ top: newTop, left: thumb.offset().left });
-					const index = calculateIndexFromY(thumb, touchY + $(window).scrollTop());
+					const index = calculateIndexFromY(
+						thumb,
+						touchY + $(window).scrollTop()
+					);
 					navigator.updateTextAndProgressBar();
 					updateThumbTextToIndex(thumb, index);
 					debounceUpdateThumbTimestamp(thumb, index);
@@ -357,10 +422,16 @@ define('navigator', [
 
 	async function updateUnreadIndicator(index) {
 		const { bookmarkThreshold } = ajaxify.data;
-		if (!paginationBlockUnreadEl.length || ajaxify.data.postcount <= bookmarkThreshold || !bookmarkThreshold) {
+		if (
+			!paginationBlockUnreadEl.length ||
+			ajaxify.data.postcount <= bookmarkThreshold ||
+			!bookmarkThreshold
+		) {
 			return;
 		}
-		const currentBookmark = ajaxify.data.bookmark || storage.getItem('topic:' + ajaxify.data.tid + ':bookmark');
+		const currentBookmark =
+			ajaxify.data.bookmark ||
+			storage.getItem('topic:' + ajaxify.data.tid + ':bookmark');
 		index = Math.max(index, Math.min(currentBookmark, ajaxify.data.postcount));
 		const unreadEl = paginationBlockUnreadEl.get(0);
 		const trackEl = unreadEl.parentNode;
@@ -385,9 +456,13 @@ define('navigator', [
 			}
 		}
 
-		if (remaining > 0 && (trackHeight - thumbBottom) >= thumbHeight) {
-			const text = await translator.translate(`[[topic:navigator.unread, ${remaining}]]`);
-			anchorEl.href = `${config.relative_path}/topic/${ajaxify.data.slug}/${Math.min(index + 1, ajaxify.data.postcount)}`;
+		if (remaining > 0 && trackHeight - thumbBottom >= thumbHeight) {
+			const text = await translator.translate(
+				`[[topic:navigator.unread, ${remaining}]]`
+			);
+			anchorEl.href = `${config.relative_path}/topic/${
+				ajaxify.data.slug
+			}/${Math.min(index + 1, ajaxify.data.postcount)}`;
 			toggleAnchor(text);
 		} else {
 			anchorEl.href = ajaxify.data.url;
@@ -403,18 +478,28 @@ define('navigator', [
 	}
 
 	async function renderPost(index) {
-		if (!index || renderPostIndex === index || !paginationBlockEl.find('.post-content').is(':visible')) {
+		if (
+			!index ||
+			renderPostIndex === index ||
+			!paginationBlockEl.find('.post-content').is(':visible')
+		) {
 			return;
 		}
 		renderPostIndex = index;
 
-		const postData = await socket.emit('posts.getPostSummaryByIndex', { tid: ajaxify.data.tid, index: index - 1 });
+		const postData = await socket.emit('posts.getPostSummaryByIndex', {
+			tid: ajaxify.data.tid,
+			index: index - 1,
+		});
 
-		const html = await app.parseAndTranslate('partials/topic/navigation-post', { post: postData });
+		const html = await app.parseAndTranslate('partials/topic/navigation-post', {
+			post: postData,
+		});
 		paginationBlockEl
 			.find('.post-content')
 			.html(html)
-			.find('.timeago').timeago();
+			.find('.timeago')
+			.timeago();
 	}
 
 	function handleKeys() {
@@ -428,10 +513,12 @@ define('navigator', [
 			if (ev.shiftKey || ev.ctrlKey || ev.altKey) {
 				return;
 			}
-			if (ev.which === 36 && navigator.toTop) { // home key
+			if (ev.which === 36 && navigator.toTop) {
+				// home key
 				navigator.toTop();
 				return false;
-			} else if (ev.which === 35 && navigator.toBottom) { // end key
+			} else if (ev.which === 35 && navigator.toBottom) {
+				// end key
 				navigator.toBottom();
 				return false;
 			}
@@ -441,7 +528,9 @@ define('navigator', [
 	function generateUrl(index) {
 		const pathname = window.location.pathname.replace(config.relative_path, '');
 		const parts = pathname.split('/');
-		return parts[1] + '/' + parts[2] + '/' + parts[3] + (index ? '/' + index : '');
+		return (
+			parts[1] + '/' + parts[2] + '/' + parts[3] + (index ? '/' + index : '')
+		);
 	}
 
 	navigator.getCount = () => count;
@@ -471,7 +560,11 @@ define('navigator', [
 	};
 
 	function toggle(flag) {
-		if (flag && (!ajaxify.data.template.topic && !ajaxify.data.template.category)) {
+		if (
+			flag &&
+			!ajaxify.data.template.topic &&
+			!ajaxify.data.template.category
+		) {
 			return;
 		}
 		paginationBlockEl.toggleClass('ready', flag);
@@ -489,7 +582,9 @@ define('navigator', [
 
 	navigator.update = function () {
 		let newIndex = index;
-		const els = $(navigator.selector).filter((i, el) => !el.getAttribute('data-navigator-ignore'));
+		const els = $(navigator.selector).filter(
+			(i, el) => !el.getAttribute('data-navigator-ignore')
+		);
 		if (els.length) {
 			newIndex = parseInt(els.first().attr('data-index'), 10) + 1;
 		}
@@ -503,7 +598,9 @@ define('navigator', [
 			const $this = $(this);
 			const elIndex = parseInt($this.attr('data-index'), 10);
 			if (elIndex >= 0) {
-				const distanceToMiddle = Math.abs(middleOfViewport - ($this.offset().top + ($this.outerHeight(true) / 2)));
+				const distanceToMiddle = Math.abs(
+					middleOfViewport - ($this.offset().top + ($this.outerHeight(true) / 2))
+				);
 				if (distanceToMiddle > previousDistance) {
 					return false;
 				}
@@ -515,8 +612,11 @@ define('navigator', [
 			}
 		});
 
-		const atTop = scrollTop === 0 && parseInt(els.first().attr('data-index'), 10) === 0;
-		const nearBottom = scrollTop + windowHeight > documentHeight - 100 && parseInt(els.last().attr('data-index'), 10) === count - 1;
+		const atTop =
+			scrollTop === 0 && parseInt(els.first().attr('data-index'), 10) === 0;
+		const nearBottom =
+			scrollTop + windowHeight > documentHeight - 100 &&
+			parseInt(els.last().attr('data-index'), 10) === count - 1;
 
 		if (atTop) {
 			newIndex = 1;
@@ -555,9 +655,13 @@ define('navigator', [
 		}
 		index = index > count ? count : index;
 		if (config.usePagination) {
-			paginationTextEl.html(`<i class="fa fa-file"></i> ${ajaxify.data.pagination.currentPage} / ${ajaxify.data.pagination.pageCount}`);
+			paginationTextEl.html(
+				`<i class='fa fa-file'></i> ${ajaxify.data.pagination.currentPage} / ${ajaxify.data.pagination.pageCount}`
+			);
 		} else {
-			paginationTextEl.translateHtml('[[global:pagination.out-of, ' + index + ', ' + count + ']]');
+			paginationTextEl.translateHtml(
+				'[[global:pagination.out-of, ' + index + ', ' + count + ']]'
+			);
 		}
 
 		const fraction = (index - 1) / (count - 1 || 1);
@@ -585,7 +689,8 @@ define('navigator', [
 		const $window = $(window);
 
 		if (config.usePagination) {
-			const atBottom = $window.scrollTop() >= $(document).height() - $window.height();
+			const atBottom =
+				$window.scrollTop() >= $(document).height() - $window.height();
 			if (atBottom) {
 				return pagination.nextPage();
 			}
@@ -596,7 +701,11 @@ define('navigator', [
 	};
 
 	navigator.scrollTop = function (index) {
-		if ($(`${navigator.selector}[data-index="${index}"]:not([data-navigator-ignore])`).length) {
+		if (
+			$(
+				`${navigator.selector}[data-index='${index}']:not([data-navigator-ignore])`
+			).length
+		) {
 			navigator.scrollToIndex(index, true);
 		} else {
 			ajaxify.go(generateUrl());
@@ -608,7 +717,11 @@ define('navigator', [
 			return;
 		}
 
-		if ($(`${navigator.selector}[data-index="${index}"]:not([data-navigator-ignore])`).length) {
+		if (
+			$(
+				`${navigator.selector}[data-index='${index}']:not([data-navigator-ignore])`
+			).length
+		) {
 			navigator.scrollToIndex(index, true);
 		} else {
 			index = parseInt(index, 10) + 1;
@@ -633,7 +746,10 @@ define('navigator', [
 		}
 
 		// if in category and item alreay on page
-		if (inCategory && $('[component="category/topic"][data-index="' + index + '"]').length) {
+		if (
+			inCategory &&
+			$("[component='category/topic'][data-index='' + index + '']").length
+		) {
 			return navigator.scrollToTopicIndex(index, highlight, duration);
 		}
 
@@ -644,7 +760,9 @@ define('navigator', [
 			return;
 		}
 
-		const scrollMethod = inTopic ? navigator.scrollToPostIndex : navigator.scrollToTopicIndex;
+		const scrollMethod = inTopic ?
+			navigator.scrollToPostIndex :
+			navigator.scrollToTopicIndex;
 
 		const page = 1 + Math.floor(index / config.postsPerPage);
 		if (parseInt(page, 10) !== ajaxify.data.pagination.currentPage) {
@@ -660,27 +778,41 @@ define('navigator', [
 		if (!ajaxify.data.template.topic || postIndex <= 1) {
 			return false;
 		}
-		const firstPostEl = $('[component="topic"] [component="post"]').first();
+		const firstPostEl = $("[component='topic'] [component='post']").first();
 		return parseInt(firstPostEl.attr('data-index'), 10) !== postIndex - 1;
 	};
 
 	navigator.scrollToPostIndex = function (postIndex, highlight, duration) {
-		const scrollTo = $(`[component="post"][data-index="${postIndex}"]:not([data-navigator-ignore])`);
+		const scrollTo = $(
+			`[component='post'][data-index='${postIndex}']:not([data-navigator-ignore])`
+		);
 		navigator.scrollToElement(scrollTo, highlight, duration, postIndex);
 	};
 
 	navigator.scrollToTopicIndex = function (topicIndex, highlight, duration) {
-		const scrollTo = $('[component="category/topic"][data-index="' + topicIndex + '"]');
+		const scrollTo = $(
+			"[component='category/topic'][data-index='' + topicIndex + '']"
+		);
 		navigator.scrollToElement(scrollTo, highlight, duration, topicIndex);
 	};
 
-	navigator.scrollToElement = async (scrollTo, highlight, duration, newIndex = null) => {
+	navigator.scrollToElement = async (
+		scrollTo,
+		highlight,
+		duration,
+		newIndex = null
+	) => {
 		if (!scrollTo.length) {
 			navigator.scrollActive = false;
 			return;
 		}
 
-		await hooks.fire('filter:navigator.scroll', { scrollTo, highlight, duration, newIndex: newIndex + 1 });
+		await hooks.fire('filter:navigator.scroll', {
+			scrollTo,
+			highlight,
+			duration,
+			newIndex: newIndex + 1,
+		});
 
 		const postHeight = scrollTo.outerHeight(true);
 		const navbarHeight = components.get('navbar').outerHeight(true) || 0;
@@ -695,15 +827,6 @@ define('navigator', [
 		let done = false;
 
 		function animateScroll() {
-			function reenableScroll() {
-				// Re-enable onScroll behaviour
-				setTimeout(() => { // fixes race condition from jQuery — onAnimateComplete called too quickly
-					$(window).off('scroll', navigator.delayedUpdate)
-						.on('scroll', navigator.delayedUpdate);
-
-					hooks.fire('action:navigator.scrolled', { scrollTo, highlight, duration, newIndex: newIndex + 1 });
-				}, 50);
-			}
 			function onAnimateComplete() {
 				if (done) {
 					reenableScroll();
@@ -734,14 +857,37 @@ define('navigator', [
 				reenableScroll();
 				return;
 			}
-			$('html, body').animate({
-				scrollTop: scrollTop + 'px',
-			}, duration, onAnimateComplete);
+			$('html, body').animate(
+				{
+					scrollTop: scrollTop + 'px',
+				},
+				duration,
+				onAnimateComplete
+			);
+		}
+
+		function reenableScroll() {
+			// Re-enable onScroll behaviour
+			setTimeout(() => {
+				// fixes race condition from jQuery — onAnimateComplete called too quickly
+				$(window)
+					.off('scroll', navigator.delayedUpdate)
+					.on('scroll', navigator.delayedUpdate);
+
+				hooks.fire('action:navigator.scrolled', {
+					scrollTo,
+					highlight,
+					duration,
+					newIndex: newIndex + 1,
+				});
+			}, 50);
 		}
 
 		function highlightPost() {
 			if (highlight) {
-				$('[component="post"],[component="category/topic"]').removeClass('highlight');
+				$("[component='post'],[component='category/topic']").removeClass(
+					'highlight'
+				);
 				scrollTo.addClass('highlight');
 				setTimeout(function () {
 					scrollTo.removeClass('highlight');
@@ -754,4 +900,3 @@ define('navigator', [
 
 	return navigator;
 });
-
