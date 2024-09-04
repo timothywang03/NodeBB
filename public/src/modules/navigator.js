@@ -866,6 +866,7 @@ define('navigator', [
 			);
 		}
 
+		console.log('Timothy Wang');
 		function reenableScroll() {
 			// Re-enable onScroll behaviour
 			setTimeout(() => {
